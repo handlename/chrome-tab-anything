@@ -69,16 +69,18 @@ window.addEventListener("load", function() {
     /// handle keys
 
     function onInput(event) {
-        if (isEnter(event)) {
-            // タブを切り替え
-        }
-
         filterItems();
-
         updateList();
     }
 
     function onSelect(event) {
+        if (isEnter(event)) {
+            // タブを切り替え
+            var selected = selectedItem();
+            chrome.tabs.update(selected.tab.id, { selected: true });
+            return;
+        }
+
         var direction = parseKeyDirection(event);
         moveSelection(direction);
 
@@ -90,9 +92,13 @@ window.addEventListener("load", function() {
     }
 
     function isEnter(event) {
-        // Ctrl+m
-        // Ctrl+j
-        // Enter
+        if (event.ctrlKey && event.which === 74 || // Ctrl+j
+            event.ctrlKey && event.which === 77 || // Ctrl+m
+            event.which === 13) { // Enter
+            return true;
+        }
+
+        return false;
     }
 
     function parseKeyDirection(event) {
