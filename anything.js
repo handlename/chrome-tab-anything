@@ -175,6 +175,14 @@ List = (function() {
     return this.refresh();
   };
 
+  List.prototype.activate = function() {
+    var selected;
+    selected = this.selectedItem();
+    return chrome.tabs.update(selected.tab.id, {
+      selected: true
+    });
+  };
+
   List.prototype.selectPrev = function() {
     var index, items, selected;
     selected = this.selectedItem();
@@ -243,7 +251,9 @@ KeyHandler = (function() {
   }
 
   KeyHandler.prototype._onKeyUp = function(event) {
-    if (this._isSelectPrev(event.which)) {
+    if (this._isEnter(event.which)) {
+      this.callbacks.enter(event);
+    } else if (this._isSelectPrev(event.which)) {
       this.callbacks.selectPrev(event);
     } else if (this._isSelectNext(event.which)) {
       this.callbacks.selectNext(event);
@@ -263,6 +273,10 @@ KeyHandler = (function() {
     return this.modifiers.meta = event.metaKey;
   };
 
+  KeyHandler.prototype._isEnter = function(keycode) {
+    return (this.modifiers.ctrl && keycode === 74) || (this.modifiers.ctrl && keycode === 77) || (keycode === 13);
+  };
+
   KeyHandler.prototype._isSelectPrev = function(keycode) {
     return this.modifiers.ctrl && keycode === 80;
   };
@@ -273,7 +287,9 @@ KeyHandler = (function() {
 
   KeyHandler.prototype.check = function(event) {};
 
-  KeyHandler.prototype.onEnter = function(callback) {};
+  KeyHandler.prototype.onEnter = function(callback) {
+    return this.callbacks.enter = callback;
+  };
 
   KeyHandler.prototype.onSelectPrev = function(callback) {
     return this.callbacks.selectPrev = callback;
@@ -305,6 +321,9 @@ window.addEventListener('load', function() {
       item = new Item(doc, tab);
       list.addItem(item);
     }
+    keyHandler.onEnter(function(event) {
+      return list.activate();
+    });
     keyHandler.onOthers(function(event) {
       return list.filter(event.target.value);
     });

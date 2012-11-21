@@ -107,6 +107,10 @@ class List
 
         @refresh()
 
+    activate: () ->
+        selected = @selectedItem()
+        chrome.tabs.update(selected.tab.id, { selected: true })
+
     selectPrev: () ->
         selected = @selectedItem()
         items    = @itemsByState(STATE.NORMAL|STATE.SELECTED)
@@ -154,7 +158,9 @@ class KeyHandler
             this._onKeyUp(event)
 
     _onKeyUp: (event) ->
-        if @_isSelectPrev(event.which)
+        if @_isEnter(event.which)
+            @callbacks.enter(event)
+        else if @_isSelectPrev(event.which)
             @callbacks.selectPrev(event)
         else if @_isSelectNext(event.which)
             @callbacks.selectNext(event)
@@ -173,6 +179,11 @@ class KeyHandler
         @modifiers.alt   = event.altKey
         @modifiers.meta  = event.metaKey
 
+    _isEnter: (keycode) ->
+        return (@modifiers.ctrl and keycode == 74) or # Ctrl+j
+               (@modifiers.ctrl and keycode == 77) or # Ctrl+m
+                                   (keycode == 13);   # Enter
+
     _isSelectPrev: (keycode) ->
         # Ctrl + p
         return @modifiers.ctrl and keycode is 80
@@ -184,6 +195,7 @@ class KeyHandler
     check: (event) ->
 
     onEnter: (callback) ->
+        @callbacks.enter = callback
 
     onSelectPrev: (callback) ->
         @callbacks.selectPrev = callback
@@ -206,6 +218,9 @@ window.addEventListener 'load', () ->
         for tab in tabs
             item = new Item(doc, tab)
             list.addItem(item)
+
+        keyHandler.onEnter (event) ->
+            list.activate()
 
         keyHandler.onOthers (event) ->
             list.filter(event.target.value)
