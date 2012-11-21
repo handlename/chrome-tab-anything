@@ -2,6 +2,10 @@
     width: 300px;
 }
 
+.hidden {
+    display: none;
+}
+
 .selected {
     color: white;
     background-color: red;

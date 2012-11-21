@@ -1,5 +1,29 @@
 p = (message) -> console.log(message)
 
+HTMLElement.prototype.addClass = (className) ->
+    classes = this.className?.split(' ')
+    return unless classes
+
+    index = classes.indexOf(className)
+
+    if index == -1
+        classes.push(className)
+        this.className = classes.join(' ')
+
+    return this
+
+HTMLElement.prototype.removeClass = (className) ->
+    classes = this.className?.split(' ')
+    return unless classes
+
+    index = classes.indexOf(className)
+
+    if index != -1
+        classes.splice(index, 1)
+        this.className = classes.join(' ')
+
+    return this
+
 STATE =
     NORMAL:   1
     HIDDEN:   2
@@ -23,13 +47,18 @@ class Item
     select: (yesNo) ->
         if yesNo is yes
             @state = STATE.SELECTED
-            @element.setAttribute('class', 'selected')
+            @element.addClass('selected')
         else
-            @state = STATE.NORMAL
-            @element.setAttribute('class', '')
+            @state = STATE.NORMAL if @state is STATE.SELECTED
+            @element.removeClass('selected')
 
     show: (yesNo) ->
-        @state = if yesNo == yes then STATE.NORMAL else STATE.HIDDEN
+        if yesNo is yes
+            @state = STATE.NORMAL if @state is STATE.HIDDEN
+            @element.removeClass('hidden')
+        else
+            @state = STATE.HIDDEN
+            @element.addClass('hidden')
 
 class List
     doc:     null
@@ -41,14 +70,24 @@ class List
     addItem: (item) ->
         @items.push(item)
 
+    itemsByState: (state) ->
+        return (item for item in @items when item.state & state)
+
+    selectedItem: () ->
+        items = @itemsByState(STATE.SELECTED)
+        return if items?.length then items[0] else undefined
+
     clear: () ->
         @element.innerHTML = ''
 
     refresh: () ->
         @clear()
 
+        # 選択されているものがなければ先頭のアイテムを選択
+        unless @selectedItem()
+            @itemsByState(STATE.NORMAL|STATE.SELECTED)[0]?.select(yes)
+
         for item in @items
-            continue if item.state is STATE.HIDDEN
             @element.appendChild(item.element)
 
     filter: (text) ->
@@ -68,6 +107,30 @@ class List
 
         @refresh()
 
+    selectPrev: () ->
+        selected = @selectedItem()
+        items    = @itemsByState(STATE.NORMAL|STATE.SELECTED)
+        index    = items.indexOf(selected)
+        index    = 0 if index == -1
+
+        --index if 0 < index
+
+        @selectOne(@items[@items.indexOf(items[index])])
+
+    selectNext: () ->
+        selected = @selectedItem()
+        items    = @itemsByState(STATE.NORMAL|STATE.SELECTED)
+        index    = items.indexOf(selected)
+        index    = 0 if index == -1
+
+        ++index if index < items.length - 1
+
+        @selectOne(@items[@items.indexOf(items[index])])
+
+    selectOne: (selected) ->
+        @items.forEach (item) ->
+            item.select(item is selected)
+
 class KeyHandler
     element: null
 
@@ -77,21 +140,56 @@ class KeyHandler
         selectNext: () ->
         others:     () ->
 
+    modifiers:
+        ctrl:  off
+        shift: off
+        alt:   off
+        meta:  off
+
     constructor: (@element) ->
-        self = this
+        @element.addEventListener 'keydown', (event) =>
+            this._onKeyDown(event)
+
         @element.addEventListener 'keyup', (event) =>
             this._onKeyUp(event)
 
     _onKeyUp: (event) ->
-        @callbacks.others(event)
+        if @_isSelectPrev(event.which)
+            @callbacks.selectPrev(event)
+        else if @_isSelectNext(event.which)
+            @callbacks.selectNext(event)
+        else
+            @callbacks.others(event)
+
+        @modifiers.ctrl  = off
+        @modifiers.shift = off
+        @modifiers.alt   = off
+        @modifiers.meta  = off
+
+    # 修飾キーの監視のみ
+    _onKeyDown: (event) ->
+        @modifiers.ctrl  = event.ctrlKey
+        @modifiers.shift = event.shiftKey
+        @modifiers.alt   = event.altKey
+        @modifiers.meta  = event.metaKey
+
+    _isSelectPrev: (keycode) ->
+        # Ctrl + p
+        return @modifiers.ctrl and keycode is 80
+
+    _isSelectNext: (keycode) ->
+        # Ctrl + n
+        return @modifiers.ctrl and keycode is 78
 
     check: (event) ->
 
     onEnter: (callback) ->
 
     onSelectPrev: (callback) ->
+        @callbacks.selectPrev = callback
 
     onSelectNext: (callback) ->
+        @callbacks.selectNext = callback
 
     onOthers: (callback) ->
         @callbacks.others = callback
@@ -111,6 +209,12 @@ window.addEventListener 'load', () ->
 
         keyHandler.onOthers (event) ->
             list.filter(event.target.value)
+
+        keyHandler.onSelectPrev (event) ->
+            list.selectPrev()
+
+        keyHandler.onSelectNext (event) ->
+            list.selectNext()
 
         list.refresh()
 

@@ -5,6 +5,34 @@ p = function(message) {
   return console.log(message);
 };
 
+HTMLElement.prototype.addClass = function(className) {
+  var classes, index, _ref;
+  classes = (_ref = this.className) != null ? _ref.split(' ') : void 0;
+  if (!classes) {
+    return;
+  }
+  index = classes.indexOf(className);
+  if (index === -1) {
+    classes.push(className);
+    this.className = classes.join(' ');
+  }
+  return this;
+};
+
+HTMLElement.prototype.removeClass = function(className) {
+  var classes, index, _ref;
+  classes = (_ref = this.className) != null ? _ref.split(' ') : void 0;
+  if (!classes) {
+    return;
+  }
+  index = classes.indexOf(className);
+  if (index !== -1) {
+    classes.splice(index, 1);
+    this.className = classes.join(' ');
+  }
+  return this;
+};
+
 STATE = {
   NORMAL: 1,
   HIDDEN: 2,
@@ -34,15 +62,25 @@ Item = (function() {
   Item.prototype.select = function(yesNo) {
     if (yesNo === true) {
       this.state = STATE.SELECTED;
-      return this.element.setAttribute('class', 'selected');
+      return this.element.addClass('selected');
     } else {
-      this.state = STATE.NORMAL;
-      return this.element.setAttribute('class', '');
+      if (this.state === STATE.SELECTED) {
+        this.state = STATE.NORMAL;
+      }
+      return this.element.removeClass('selected');
     }
   };
 
   Item.prototype.show = function(yesNo) {
-    return this.state = yesNo === true ? STATE.NORMAL : STATE.HIDDEN;
+    if (yesNo === true) {
+      if (this.state === STATE.HIDDEN) {
+        this.state = STATE.NORMAL;
+      }
+      return this.element.removeClass('hidden');
+    } else {
+      this.state = STATE.HIDDEN;
+      return this.element.addClass('hidden');
+    }
   };
 
   return Item;
@@ -66,20 +104,48 @@ List = (function() {
     return this.items.push(item);
   };
 
+  List.prototype.itemsByState = function(state) {
+    var item;
+    return (function() {
+      var _i, _len, _ref, _results;
+      _ref = this.items;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        item = _ref[_i];
+        if (item.state & state) {
+          _results.push(item);
+        }
+      }
+      return _results;
+    }).call(this);
+  };
+
+  List.prototype.selectedItem = function() {
+    var items;
+    items = this.itemsByState(STATE.SELECTED);
+    if (items != null ? items.length : void 0) {
+      return items[0];
+    } else {
+      return void 0;
+    }
+  };
+
   List.prototype.clear = function() {
     return this.element.innerHTML = '';
   };
 
   List.prototype.refresh = function() {
-    var item, _i, _len, _ref, _results;
+    var item, _i, _len, _ref, _ref1, _results;
     this.clear();
-    _ref = this.items;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      item = _ref[_i];
-      if (item.state === STATE.HIDDEN) {
-        continue;
+    if (!this.selectedItem()) {
+      if ((_ref = this.itemsByState(STATE.NORMAL | STATE.SELECTED)[0]) != null) {
+        _ref.select(true);
       }
+    }
+    _ref1 = this.items;
+    _results = [];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      item = _ref1[_i];
       _results.push(this.element.appendChild(item.element));
     }
     return _results;
@@ -109,6 +175,40 @@ List = (function() {
     return this.refresh();
   };
 
+  List.prototype.selectPrev = function() {
+    var index, items, selected;
+    selected = this.selectedItem();
+    items = this.itemsByState(STATE.NORMAL | STATE.SELECTED);
+    index = items.indexOf(selected);
+    if (index === -1) {
+      index = 0;
+    }
+    if (0 < index) {
+      --index;
+    }
+    return this.selectOne(this.items[this.items.indexOf(items[index])]);
+  };
+
+  List.prototype.selectNext = function() {
+    var index, items, selected;
+    selected = this.selectedItem();
+    items = this.itemsByState(STATE.NORMAL | STATE.SELECTED);
+    index = items.indexOf(selected);
+    if (index === -1) {
+      index = 0;
+    }
+    if (index < items.length - 1) {
+      ++index;
+    }
+    return this.selectOne(this.items[this.items.indexOf(items[index])]);
+  };
+
+  List.prototype.selectOne = function(selected) {
+    return this.items.forEach(function(item) {
+      return item.select(item === selected);
+    });
+  };
+
   return List;
 
 })();
@@ -124,27 +224,64 @@ KeyHandler = (function() {
     others: function() {}
   };
 
+  KeyHandler.prototype.modifiers = {
+    ctrl: false,
+    shift: false,
+    alt: false,
+    meta: false
+  };
+
   function KeyHandler(element) {
-    var self,
-      _this = this;
+    var _this = this;
     this.element = element;
-    self = this;
+    this.element.addEventListener('keydown', function(event) {
+      return _this._onKeyDown(event);
+    });
     this.element.addEventListener('keyup', function(event) {
       return _this._onKeyUp(event);
     });
   }
 
   KeyHandler.prototype._onKeyUp = function(event) {
-    return this.callbacks.others(event);
+    if (this._isSelectPrev(event.which)) {
+      this.callbacks.selectPrev(event);
+    } else if (this._isSelectNext(event.which)) {
+      this.callbacks.selectNext(event);
+    } else {
+      this.callbacks.others(event);
+    }
+    this.modifiers.ctrl = false;
+    this.modifiers.shift = false;
+    this.modifiers.alt = false;
+    return this.modifiers.meta = false;
+  };
+
+  KeyHandler.prototype._onKeyDown = function(event) {
+    this.modifiers.ctrl = event.ctrlKey;
+    this.modifiers.shift = event.shiftKey;
+    this.modifiers.alt = event.altKey;
+    return this.modifiers.meta = event.metaKey;
+  };
+
+  KeyHandler.prototype._isSelectPrev = function(keycode) {
+    return this.modifiers.ctrl && keycode === 80;
+  };
+
+  KeyHandler.prototype._isSelectNext = function(keycode) {
+    return this.modifiers.ctrl && keycode === 78;
   };
 
   KeyHandler.prototype.check = function(event) {};
 
   KeyHandler.prototype.onEnter = function(callback) {};
 
-  KeyHandler.prototype.onSelectPrev = function(callback) {};
+  KeyHandler.prototype.onSelectPrev = function(callback) {
+    return this.callbacks.selectPrev = callback;
+  };
 
-  KeyHandler.prototype.onSelectNext = function(callback) {};
+  KeyHandler.prototype.onSelectNext = function(callback) {
+    return this.callbacks.selectNext = callback;
+  };
 
   KeyHandler.prototype.onOthers = function(callback) {
     return this.callbacks.others = callback;
@@ -170,6 +307,12 @@ window.addEventListener('load', function() {
     }
     keyHandler.onOthers(function(event) {
       return list.filter(event.target.value);
+    });
+    keyHandler.onSelectPrev(function(event) {
+      return list.selectPrev();
+    });
+    keyHandler.onSelectNext(function(event) {
+      return list.selectNext();
     });
     return list.refresh();
   });
