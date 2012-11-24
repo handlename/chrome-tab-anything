@@ -44,6 +44,9 @@ class Item
         this.select(no)
         this.show(yes)
 
+    source: () ->
+        return [@tab.title, @tab.url].join(',')
+
     select: (yesNo) ->
         if yesNo is yes
             @state = STATE.SELECTED
@@ -98,7 +101,7 @@ class List
             flag = yes
 
             for pattern in patterns
-                flag = no unless item.tab.title.match pattern
+                flag = no unless item.source().match pattern
 
             if flag is yes
                 item.show(yes)

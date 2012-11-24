@@ -59,6 +59,10 @@ Item = (function() {
     this.show(true);
   }
 
+  Item.prototype.source = function() {
+    return [this.tab.title, this.tab.url].join(',');
+  };
+
   Item.prototype.select = function(yesNo) {
     if (yesNo === true) {
       this.state = STATE.SELECTED;
@@ -162,7 +166,7 @@ List = (function() {
       flag = true;
       for (_j = 0, _len1 = patterns.length; _j < _len1; _j++) {
         pattern = patterns[_j];
-        if (!item.tab.title.match(pattern)) {
+        if (!item.source().match(pattern)) {
           flag = false;
         }
       }
