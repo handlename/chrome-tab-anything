@@ -38,11 +38,20 @@ class Item
     constructor: (@doc, @tab) ->
         @state = STATE.NORMAL
 
-        @element           = @doc.createElement('li')
-        @element.innerHTML = @tab.title
+        @_createElement()
 
         this.select(no)
         this.show(yes)
+
+    _createElement: () ->
+        template = @doc.getElementById('item-template').innerHTML
+        template = template.replace('{title}', @tab.title)
+        template = template.replace('{url}', @tab.url)
+
+        dummy           = @doc.createElement('dummy')
+        dummy.innerHTML = template
+
+        @element = dummy.getElementsByTagName('li')[0]
 
     source: () ->
         return [@tab.title, @tab.url].join(',')

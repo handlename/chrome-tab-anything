@@ -53,11 +53,20 @@ Item = (function() {
     this.doc = doc;
     this.tab = tab;
     this.state = STATE.NORMAL;
-    this.element = this.doc.createElement('li');
-    this.element.innerHTML = this.tab.title;
+    this._createElement();
     this.select(false);
     this.show(true);
   }
+
+  Item.prototype._createElement = function() {
+    var dummy, template;
+    template = this.doc.getElementById('item-template').innerHTML;
+    template = template.replace('{title}', this.tab.title);
+    template = template.replace('{url}', this.tab.url);
+    dummy = this.doc.createElement('dummy');
+    dummy.innerHTML = template;
+    return this.element = dummy.getElementsByTagName('li')[0];
+  };
 
   Item.prototype.source = function() {
     return [this.tab.title, this.tab.url].join(',');

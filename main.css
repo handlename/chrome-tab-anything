@@ -1,5 +1,6 @@
 #list {
-    width: 300px;
+    width: 600px;
+    height: 600px;
 }
 
 .hidden {
@@ -9,4 +10,18 @@
 .selected {
     color: white;
     background-color: red;
+}
+
+.item {
+    white-space: nowrap;
+}
+
+.item .title {
+    font-size: small;
+    color: #444;
+}
+
+.item .url {
+    font-size: x-small;
+    color: #888;
 }
