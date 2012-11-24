@@ -1,19 +1,38 @@
-#list {
-    width: 600px;
-    height: 600px;
-}
-
 .hidden {
     display: none;
 }
 
 .selected {
     color: white;
-    background-color: red;
+    background-color: #bbb;
+    border-radius: 5px;
+}
+
+body {
+    width: 600px;
+    height: 600px;
+}
+
+#input {
+    width: 90%;
+    margin-left: 5px;
+}
+
+#list {
+    width: 90%;
+    height: 90%;
+    margin-left: 5px;
+    padding: 0;
+    list-style-type: none;
+    overflow: hidden
 }
 
 .item {
     white-space: nowrap;
+}
+
+.item .title, .item .url {
+    padding: 5px;
 }
 
 .item .title {
@@ -24,4 +43,5 @@
 .item .url {
     font-size: x-small;
     color: #888;
+    margin-top: -10px;
 }
