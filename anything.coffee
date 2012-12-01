@@ -196,12 +196,12 @@ class KeyHandler
                                    (keycode == 13);   # Enter
 
     _isSelectPrev: (keycode) ->
-        # Ctrl + p
-        return @modifiers.ctrl and keycode is 80
+        return (@modifiers.ctrl and keycode == 80) or # Ctrl + p
+                                   (keycode == 38)    # Up
 
     _isSelectNext: (keycode) ->
-        # Ctrl + n
-        return @modifiers.ctrl and keycode is 78
+        return (@modifiers.ctrl and keycode == 78) or # Ctrl + n
+                                   (keycode == 40)    # Down
 
     check: (event) ->
 

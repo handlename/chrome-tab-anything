@@ -292,11 +292,11 @@ KeyHandler = (function() {
   };
 
   KeyHandler.prototype._isSelectPrev = function(keycode) {
-    return this.modifiers.ctrl && keycode === 80;
+    return (this.modifiers.ctrl && keycode === 80) || (keycode === 38);
   };
 
   KeyHandler.prototype._isSelectNext = function(keycode) {
-    return this.modifiers.ctrl && keycode === 78;
+    return (this.modifiers.ctrl && keycode === 78) || (keycode === 40);
   };
 
   KeyHandler.prototype.check = function(event) {};
