@@ -191,8 +191,8 @@ class KeyHandler
         @modifiers.meta  = event.metaKey
 
     _isEnter: (keycode) ->
-        return (@modifiers.ctrl and keycode == 74) or # Ctrl+j
-               (@modifiers.ctrl and keycode == 77) or # Ctrl+m
+        return (@modifiers.ctrl and keycode == 74) or # Ctrl + j
+               (@modifiers.ctrl and keycode == 77) or # Ctrl + m
                                    (keycode == 13);   # Enter
 
     _isSelectPrev: (keycode) ->
