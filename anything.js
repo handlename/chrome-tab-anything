@@ -299,8 +299,6 @@ KeyHandler = (function() {
     return (this.modifiers.ctrl && keycode === 78) || (keycode === 40);
   };
 
-  KeyHandler.prototype.check = function(event) {};
-
   KeyHandler.prototype.onEnter = function(callback) {
     return this.callbacks.enter = callback;
   };

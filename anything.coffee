@@ -203,8 +203,6 @@ class KeyHandler
         return (@modifiers.ctrl and keycode == 78) or # Ctrl + n
                                    (keycode == 40)    # Down
 
-    check: (event) ->
-
     onEnter: (callback) ->
         @callbacks.enter = callback
 
