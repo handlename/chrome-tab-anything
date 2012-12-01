@@ -179,13 +179,12 @@ class KeyHandler
         else
             @callbacks.others(event)
 
-        @modifiers.ctrl  = off
-        @modifiers.shift = off
-        @modifiers.alt   = off
-        @modifiers.meta  = off
+        @_updateModifier(event)
 
-    # 修飾キーの監視のみ
     _onKeyDown: (event) ->
+        @_updateModifier(event)
+
+    _updateModifier: (event) ->
         @modifiers.ctrl  = event.ctrlKey
         @modifiers.shift = event.shiftKey
         @modifiers.alt   = event.altKey

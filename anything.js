@@ -273,13 +273,14 @@ KeyHandler = (function() {
     } else {
       this.callbacks.others(event);
     }
-    this.modifiers.ctrl = false;
-    this.modifiers.shift = false;
-    this.modifiers.alt = false;
-    return this.modifiers.meta = false;
+    return this._updateModifier(event);
   };
 
   KeyHandler.prototype._onKeyDown = function(event) {
+    return this._updateModifier(event);
+  };
+
+  KeyHandler.prototype._updateModifier = function(event) {
     this.modifiers.ctrl = event.ctrlKey;
     this.modifiers.shift = event.shiftKey;
     this.modifiers.alt = event.altKey;
