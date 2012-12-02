@@ -152,6 +152,7 @@ class KeyHandler
 
     callbacks:
         enter:      () ->
+        esc:        () ->
         selectPrev: () ->
         selectNext: () ->
         others:     () ->
@@ -172,6 +173,8 @@ class KeyHandler
     _onKeyUp: (event) ->
         if @_isEnter(event.which)
             @callbacks.enter(event)
+        else if @_isEsc(event.which)
+            @callbacks.esc(event)
         else if @_isSelectPrev(event.which)
             @callbacks.selectPrev(event)
         else if @_isSelectNext(event.which)
@@ -195,6 +198,10 @@ class KeyHandler
                (@modifiers.ctrl and keycode == 77) or # Ctrl + m
                                    (keycode == 13);   # Enter
 
+    _isEsc: (keycode) ->
+        return (@modifiers.ctrl and keycode == 71) or # Ctrl + g
+                                   (keycode == 27)    # Esc
+
     _isSelectPrev: (keycode) ->
         return (@modifiers.ctrl and keycode == 80) or # Ctrl + p
                                    (keycode == 38)    # Up
@@ -205,6 +212,9 @@ class KeyHandler
 
     onEnter: (callback) ->
         @callbacks.enter = callback
+
+    onEsc: (callback) ->
+        @callbacks.esc = callback
 
     onSelectPrev: (callback) ->
         @callbacks.selectPrev = callback
@@ -228,17 +238,11 @@ window.addEventListener 'load', () ->
             item = new Item(doc, tab)
             list.addItem(item)
 
-        keyHandler.onEnter (event) ->
-            list.activate()
-
-        keyHandler.onOthers (event) ->
-            list.filter(event.target.value)
-
-        keyHandler.onSelectPrev (event) ->
-            list.selectNext(DIRECTION.PREV)
-
-        keyHandler.onSelectNext (event) ->
-            list.selectNext(DIRECTION.NEXT)
+        keyHandler.onEnter      (event) -> list.activate()
+        keyHandler.onOthers     (event) -> list.filter(event.target.value)
+        keyHandler.onSelectPrev (event) -> list.selectNext(DIRECTION.PREV)
+        keyHandler.onSelectNext (event) -> list.selectNext(DIRECTION.NEXT)
+        keyHandler.onEsc        (event) -> window.close()
 
         list.refresh()
 

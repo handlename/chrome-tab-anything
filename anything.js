@@ -241,6 +241,7 @@ KeyHandler = (function() {
 
   KeyHandler.prototype.callbacks = {
     enter: function() {},
+    esc: function() {},
     selectPrev: function() {},
     selectNext: function() {},
     others: function() {}
@@ -267,6 +268,8 @@ KeyHandler = (function() {
   KeyHandler.prototype._onKeyUp = function(event) {
     if (this._isEnter(event.which)) {
       this.callbacks.enter(event);
+    } else if (this._isEsc(event.which)) {
+      this.callbacks.esc(event);
     } else if (this._isSelectPrev(event.which)) {
       this.callbacks.selectPrev(event);
     } else if (this._isSelectNext(event.which)) {
@@ -292,6 +295,10 @@ KeyHandler = (function() {
     return (this.modifiers.ctrl && keycode === 74) || (this.modifiers.ctrl && keycode === 77) || (keycode === 13);
   };
 
+  KeyHandler.prototype._isEsc = function(keycode) {
+    return (this.modifiers.ctrl && keycode === 71) || (keycode === 27);
+  };
+
   KeyHandler.prototype._isSelectPrev = function(keycode) {
     return (this.modifiers.ctrl && keycode === 80) || (keycode === 38);
   };
@@ -302,6 +309,10 @@ KeyHandler = (function() {
 
   KeyHandler.prototype.onEnter = function(callback) {
     return this.callbacks.enter = callback;
+  };
+
+  KeyHandler.prototype.onEsc = function(callback) {
+    return this.callbacks.esc = callback;
   };
 
   KeyHandler.prototype.onSelectPrev = function(callback) {
@@ -345,6 +356,9 @@ window.addEventListener('load', function() {
     });
     keyHandler.onSelectNext(function(event) {
       return list.selectNext(DIRECTION.NEXT);
+    });
+    keyHandler.onEsc(function(event) {
+      return window.close();
     });
     return list.refresh();
   });
