@@ -202,7 +202,7 @@ List = (function() {
   };
 
   List.prototype.selectNext = function(direction) {
-    var cond, diff, index, items, selected;
+    var index, items, selected;
     selected = this.selectedItem();
     items = this.itemsByState(STATE.NORMAL | STATE.SELECTED);
     index = items.indexOf(selected);
@@ -210,14 +210,17 @@ List = (function() {
       index = 0;
     }
     if (direction < 0) {
-      diff = -1;
-      cond = 0 < index;
+      if (0 < index) {
+        --index;
+      } else {
+        index = items.length - 1;
+      }
     } else {
-      diff = 1;
-      cond = index < items.length - 1;
-    }
-    if (cond) {
-      index += diff;
+      if (index < items.length - 1) {
+        ++index;
+      } else {
+        index = 0;
+      }
     }
     return this.selectOne(this.items[this.items.indexOf(items[index])]);
   };

@@ -133,14 +133,13 @@ class List
         index    = items.indexOf(selected)
         index    = 0 if index == -1
 
+        # 指定方向のアイテムを選択
+        # 指定方向にアイテムがなければリストをループして
+        # 逆サイドのアイテムを選択
         if direction < 0
-            diff = -1
-            cond = 0 < index
+            if 0 < index then --index else index = items.length - 1
         else
-            diff = 1
-            cond = index < items.length - 1
-
-        index += diff if cond
+            if index < items.length - 1 then ++index else index = 0
 
         @selectOne(@items[@items.indexOf(items[index])])
 
