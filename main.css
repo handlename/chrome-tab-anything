@@ -18,6 +18,8 @@ body {
     margin-left: 5px;
 }
 
+/* list */
+
 #list {
     width: 90%;
     height: 90%;
@@ -27,12 +29,27 @@ body {
     overflow: hidden
 }
 
+/* item */
+
 .item {
     white-space: nowrap;
+    cursor: pointer;
 }
 
-.item .title, .item .url {
+.item .first-line, .item .second-line {
     padding: 5px;
+}
+
+.item .second-line {
+    margin-top: -17px;
+}
+
+/* text in item */
+
+.item .favicon {
+    position: relative;
+    top: 3px;
+    margin-right: 3px;
 }
 
 .item .title {
@@ -43,5 +60,4 @@ body {
 .item .url {
     font-size: x-small;
     color: #888;
-    margin-top: -10px;
 }

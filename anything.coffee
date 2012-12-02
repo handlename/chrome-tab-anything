@@ -61,8 +61,8 @@ class Item
 
     _createElement: () ->
         template = @doc.getElementById('item-template').innerHTML
-        template = template.replace('{title}', @tab.title)
-        template = template.replace('{url}', @tab.url)
+        template = template.replace(/{title}/g, @tab.title)
+        template = template.replace(/{url}/g, @tab.url)
 
         dummy           = @doc.createElement('dummy')
         dummy.innerHTML = template

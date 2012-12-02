@@ -78,8 +78,8 @@ Item = (function() {
   Item.prototype._createElement = function() {
     var dummy, template;
     template = this.doc.getElementById('item-template').innerHTML;
-    template = template.replace('{title}', this.tab.title);
-    template = template.replace('{url}', this.tab.url);
+    template = template.replace(/{title}/g, this.tab.title);
+    template = template.replace(/{url}/g, this.tab.url);
     dummy = this.doc.createElement('dummy');
     dummy.innerHTML = template;
     return dummy.getElementsByTagName('li')[0];

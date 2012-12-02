@@ -8,6 +8,7 @@
         "default_popup": "index.html"
     },
     "permissions": [
-        "tabs"
+        "tabs",
+        "chrome://favicon/"
     ]
 }
