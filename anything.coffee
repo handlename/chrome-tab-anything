@@ -29,6 +29,10 @@ STATE =
     HIDDEN:   2
     SELECTED: 4
 
+DIRECTION =
+    NEXT: 1
+    PREV: -1
+
 class Item
     doc:     null
     tab:     null
@@ -123,23 +127,20 @@ class List
         selected = @selectedItem()
         chrome.tabs.update(selected.tab.id, { selected: true })
 
-    selectPrev: () ->
+    selectNext: (direction) ->
         selected = @selectedItem()
         items    = @itemsByState(STATE.NORMAL|STATE.SELECTED)
         index    = items.indexOf(selected)
         index    = 0 if index == -1
 
-        --index if 0 < index
+        if direction < 0
+            diff = -1
+            cond = 0 < index
+        else
+            diff = 1
+            cond = index < items.length - 1
 
-        @selectOne(@items[@items.indexOf(items[index])])
-
-    selectNext: () ->
-        selected = @selectedItem()
-        items    = @itemsByState(STATE.NORMAL|STATE.SELECTED)
-        index    = items.indexOf(selected)
-        index    = 0 if index == -1
-
-        ++index if index < items.length - 1
+        index += diff if cond
 
         @selectOne(@items[@items.indexOf(items[index])])
 
@@ -235,10 +236,10 @@ window.addEventListener 'load', () ->
             list.filter(event.target.value)
 
         keyHandler.onSelectPrev (event) ->
-            list.selectPrev()
+            list.selectNext(DIRECTION.PREV)
 
         keyHandler.onSelectNext (event) ->
-            list.selectNext()
+            list.selectNext(DIRECTION.NEXT)
 
         list.refresh()
 
