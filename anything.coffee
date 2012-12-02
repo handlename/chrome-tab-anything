@@ -40,14 +40,20 @@ class Item
     state:   null
 
     callbacks:
-        click: () ->
+        click:     () ->
+        mouseover: () ->
 
     constructor: (@doc, @tab) ->
         @state = STATE.NORMAL
 
         @element = @_createElement()
+
         @element.addEventListener 'click', (event) =>
             @callbacks.click(this)
+        , false
+
+        @element.addEventListener 'mouseover', (event) =>
+            @callbacks.mouseover(this)
         , false
 
         this.select(no)
@@ -85,6 +91,9 @@ class Item
     onClick: (callback) ->
         @callbacks.click = callback
 
+    onMouseover: (callback) ->
+        @callbacks.mouseover = callback
+
 class List
     doc:     null
     element: null
@@ -94,9 +103,9 @@ class List
 
     addItem: (item) ->
         @items.push(item)
-        item.onClick (that) =>
-            @selectOne(that)
-            @activate()
+
+        item.onClick     (that) => @selectOne(that); @activate()
+        item.onMouseover (that) => @selectOne(that)
 
     itemsByState: (state) ->
         return (item for item in @items when item.state & state)

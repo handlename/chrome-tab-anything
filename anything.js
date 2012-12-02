@@ -55,7 +55,8 @@ Item = (function() {
   Item.prototype.state = null;
 
   Item.prototype.callbacks = {
-    click: function() {}
+    click: function() {},
+    mouseover: function() {}
   };
 
   function Item(doc, tab) {
@@ -66,6 +67,9 @@ Item = (function() {
     this.element = this._createElement();
     this.element.addEventListener('click', function(event) {
       return _this.callbacks.click(_this);
+    }, false);
+    this.element.addEventListener('mouseover', function(event) {
+      return _this.callbacks.mouseover(_this);
     }, false);
     this.select(false);
     this.show(true);
@@ -113,6 +117,10 @@ Item = (function() {
     return this.callbacks.click = callback;
   };
 
+  Item.prototype.onMouseover = function(callback) {
+    return this.callbacks.mouseover = callback;
+  };
+
   return Item;
 
 })();
@@ -133,9 +141,12 @@ List = (function() {
   List.prototype.addItem = function(item) {
     var _this = this;
     this.items.push(item);
-    return item.onClick(function(that) {
+    item.onClick(function(that) {
       _this.selectOne(that);
       return _this.activate();
+    });
+    return item.onMouseover(function(that) {
+      return _this.selectOne(that);
     });
   };
 
