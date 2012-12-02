@@ -39,10 +39,16 @@ class Item
     element: null
     state:   null
 
+    callbacks:
+        click: () ->
+
     constructor: (@doc, @tab) ->
         @state = STATE.NORMAL
 
-        @_createElement()
+        @element = @_createElement()
+        @element.addEventListener 'click', (event) =>
+            @callbacks.click(this)
+        , false
 
         this.select(no)
         this.show(yes)
@@ -55,7 +61,7 @@ class Item
         dummy           = @doc.createElement('dummy')
         dummy.innerHTML = template
 
-        @element = dummy.getElementsByTagName('li')[0]
+        return dummy.getElementsByTagName('li')[0]
 
     source: () ->
         return [@tab.title, @tab.url].join(',')
@@ -76,6 +82,9 @@ class Item
             @state = STATE.HIDDEN
             @element.addClass('hidden')
 
+    onClick: (callback) ->
+        @callbacks.click = callback
+
 class List
     doc:     null
     element: null
@@ -85,6 +94,9 @@ class List
 
     addItem: (item) ->
         @items.push(item)
+        item.onClick (that) =>
+            @selectOne(that)
+            @activate()
 
     itemsByState: (state) ->
         return (item for item in @items when item.state & state)

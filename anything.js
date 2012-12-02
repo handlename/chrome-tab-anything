@@ -54,11 +54,19 @@ Item = (function() {
 
   Item.prototype.state = null;
 
+  Item.prototype.callbacks = {
+    click: function() {}
+  };
+
   function Item(doc, tab) {
+    var _this = this;
     this.doc = doc;
     this.tab = tab;
     this.state = STATE.NORMAL;
-    this._createElement();
+    this.element = this._createElement();
+    this.element.addEventListener('click', function(event) {
+      return _this.callbacks.click(_this);
+    }, false);
     this.select(false);
     this.show(true);
   }
@@ -70,7 +78,7 @@ Item = (function() {
     template = template.replace('{url}', this.tab.url);
     dummy = this.doc.createElement('dummy');
     dummy.innerHTML = template;
-    return this.element = dummy.getElementsByTagName('li')[0];
+    return dummy.getElementsByTagName('li')[0];
   };
 
   Item.prototype.source = function() {
@@ -101,6 +109,10 @@ Item = (function() {
     }
   };
 
+  Item.prototype.onClick = function(callback) {
+    return this.callbacks.click = callback;
+  };
+
   return Item;
 
 })();
@@ -119,7 +131,12 @@ List = (function() {
   }
 
   List.prototype.addItem = function(item) {
-    return this.items.push(item);
+    var _this = this;
+    this.items.push(item);
+    return item.onClick(function(that) {
+      _this.selectOne(that);
+      return _this.activate();
+    });
   };
 
   List.prototype.itemsByState = function(state) {
