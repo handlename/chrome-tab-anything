@@ -10,7 +10,6 @@
 
 body {
     width: 600px;
-    height: 600px;
 }
 
 #input {
@@ -22,11 +21,9 @@ body {
 
 #list {
     width: 90%;
-    height: 90%;
     margin-left: 5px;
     padding: 0;
     list-style-type: none;
-    overflow: hidden
 }
 
 /* item */
@@ -38,6 +35,8 @@ body {
 
 .item .first-line, .item .second-line {
     padding: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .item .second-line {
